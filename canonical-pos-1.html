@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>POSVerse — Canonical Product of Sums | Digital Electronics</title>
+<meta name="description" content="Premium interactive platform to learn Canonical Product of Sums (POS): theory, conversions, truth table generator, a real Quine-McCluskey K-Map solver, a POS calculator, solved examples and a quiz — for Digital Electronics & Boolean Algebra students.">
+<meta name="keywords" content="Canonical Product of Sums, POS, Boolean Algebra, Maxterms, K-Map, Karnaugh Map, Digital Electronics, Quine-McCluskey">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============ THEME TOKENS ============ */
+:root{
+  --bg:#050a07; --bg2:#081310;
+  --panel: rgba(14,26,20,0.55); --panel-solid:#0c1712;
+  --panel-2: rgba(20,36,28,0.55);
+  --line: rgba(18,242,150,0.18); --line-strong: rgba(18,242,150,0.4);
+  --text:#eafbf1; --muted:#93b6a4; --muted-dim:#5f7d6c;
+  --emerald:#12f296; --emerald-dim:#0c6b46; --emerald-soft: rgba(18,242,150,0.1);
+  --amber:#ffb157; --amber-dim:#6b4a26;
+  --cyan:#63e0ff; --violet:#b98bff; --pink:#ff6b9d; --gold:#ffe066;
+  --radius:16px; --radius-sm:10px;
+  --font: 'Poppins', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+body.light{
+  --bg:#f3f8f5; --bg2:#eaf3ee;
+  --panel: rgba(255,255,255,0.65); --panel-solid:#ffffff;
+  --panel-2: rgba(240,247,243,0.7);
+  --line: rgba(10,120,80,0.18); --line-strong: rgba(10,120,80,0.4);
+  --text:#0c1a13; --muted:#3f5c4d; --muted-dim:#6c8577;
+  --emerald:#0a9a63; --emerald-dim:#bdead4; --emerald-soft: rgba(10,154,99,0.08);
+  --amber:#b8650a; --amber-dim:#f4dcb8;
+  --cyan:#0f7fa8; --violet:#7c4fd1; --pink:#c73866; --gold:#a67e00;
+}
+*{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:var(--font); line-height:1.65; overflow-x:hidden;
+  transition: background-color .3s ease, color .3s ease;
+}
+::selection{ background:var(--emerald-dim); color:var(--text); }
+a{ color:var(--emerald); }
+:focus-visible{ outline:2px solid var(--emerald); outline-offset:2px; border-radius:4px; }
+h1,h2,h3,h4{ font-family:var(--font); font-weight:700; letter-spacing:-0.01em; margin:0 0 .5em; }
+p{ color:var(--muted); margin:0 0 12px; }
+.mono{ font-family:var(--mono); }
+.bar{ text-decoration:overline; text-decoration-thickness:2px; }
+button{ font-family:var(--font); }
+.wrap{ max-width:1080px; margin:0 auto; padding:0 22px; }
+.wrap-narrow{ max-width:760px; margin:0 auto; padding:0 22px; }
+
+/* ============ ANIMATED BACKDROP ============ */
+.backdrop{ position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
+.grid-layer{
+  position:absolute; inset:-2px;
+  background-image:
+    linear-gradient(rgba(18,242,150,0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(18,242,150,0.07) 1px, transparent 1px);
+  background-size:46px 46px;
+  animation: gridDrift 24s linear infinite;
+}
+body.light .grid-layer{ background-image:
+    linear-gradient(rgba(10,120,80,0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(10,120,80,0.08) 1px, transparent 1px); }
+@keyframes gridDrift{ from{ background-position:0 0; } to{ background-position:46px 46px; } }
+.glow{ position:absolute; border-radius:50%; filter:blur(70px); opacity:.35; animation: floatBlob 18s ease-in-out infinite; }
+.glow.g1{ width:340px; height:340px; background:var(--emerald); top:-80px; left:-60px; }
+.glow.g2{ width:280px; height:280px; background:var(--cyan); bottom:10%; right:-60px; animation-delay:-6s; }
+.glow.g3{ width:260px; height:260px; background:var(--violet); top:40%; left:60%; animation-delay:-11s; }
+@keyframes floatBlob{ 0%,100%{ transform:translate(0,0) scale(1);} 50%{ transform:translate(20px,-30px) scale(1.12);} }
+.particle{ position:absolute; width:3px; height:3px; border-radius:50%; background:var(--emerald); box-shadow:0 0 8px 2px var(--emerald); animation: rise linear infinite; opacity:.6; }
+@keyframes rise{ from{ transform:translateY(0); opacity:0;} 10%{opacity:.7;} to{ transform:translateY(-100vh); opacity:0; } }
+@media (prefers-reduced-motion: reduce){ .grid-layer,.glow,.particle{ animation:none !important; } }
+
+/* ============ LOADING SCREEN ============ */
+#loader{
+  position:fixed; inset:0; z-index:999; background:var(--bg);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px;
+  transition: opacity .5s ease, visibility .5s ease;
+}
+#loader.hide{ opacity:0; visibility:hidden; }
+.spin-logo{
+  width:56px; height:56px; border-radius:50%;
+  border:3px solid var(--line); border-top-color:var(--emerald);
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin{ to{ transform:rotate(360deg); } }
+.loader-text{ font-family:var(--mono); font-size:12.5px; letter-spacing:.15em; color:var(--muted); text-transform:uppercase; }
+
+/* ============ SCROLL PROGRESS + TOP BTN ============ */
+#scrollProgress{
+  position:fixed; top:0; left:0; height:3px; width:0%; z-index:60;
+  background:linear-gradient(90deg, var(--emerald), var(--cyan));
+  box-shadow:0 0 10px var(--emerald);
+  transition:width .1s linear;
+}
+#toTop{
+  position:fixed; right:20px; bottom:22px; z-index:40;
+  width:44px; height:44px; border-radius:50%;
+  background:var(--panel); border:1px solid var(--line); color:var(--emerald);
+  backdrop-filter:blur(10px); cursor:pointer; font-size:18px;
+  opacity:0; pointer-events:none; transform:translateY(10px);
+  transition:opacity .25s ease, transform .25s ease, box-shadow .2s ease;
+}
+#toTop.show{ opacity:1; pointer-events:auto; transform:none; }
+#toTop:hover{ box-shadow:0 0 16px var(--emerald-soft), 0 0 0 1px var(--emerald); }
+
+/* ============ APP BAR ============ */
+.app-bar{
+  position:sticky; top:0; z-index:30;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:14px 20px; background:var(--panel); backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.app-bar-left{ display:flex; align-items:center; gap:12px; min-width:0; }
+.icon-btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:38px; height:38px; border-radius:50%;
+  border:1px solid var(--line); background:var(--panel-2); color:var(--text);
+  cursor:pointer; font-size:16px; flex:none; transition: box-shadow .2s ease, border-color .2s ease;
+}
+.icon-btn:hover{ border-color:var(--emerald); box-shadow:0 0 12px var(--emerald-soft); }
+.brand{ font-weight:800; font-size:16.5px; display:flex; align-items:center; gap:8px; white-space:nowrap; }
+.brand .dot{ width:8px; height:8px; border-radius:50%; background:var(--emerald); box-shadow:0 0 10px 2px var(--emerald); }
+.brand span.accent{ color:var(--emerald); }
+.searchbox{ display:flex; align-items:center; gap:8px; background:var(--panel-2); border:1px solid var(--line); border-radius:999px; padding:7px 14px; flex:1; max-width:220px; }
+.searchbox input{ background:none; border:none; outline:none; color:var(--text); font-size:13px; width:100%; font-family:var(--font); }
+.searchbox input::placeholder{ color:var(--muted-dim); }
+.app-bar-right{ display:flex; align-items:center; gap:8px; }
+@media (max-width:720px){ .searchbox{ display:none; } }
+
+/* ============ DRAWER NAV ============ */
+#drawerOverlay{ position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:45; opacity:0; pointer-events:none; transition:opacity .25s ease; }
+#drawerOverlay.show{ opacity:1; pointer-events:auto; }
+#drawer{
+  position:fixed; top:0; left:0; bottom:0; width:280px; z-index:50;
+  background:var(--panel-solid); border-right:1px solid var(--line);
+  transform:translateX(-100%); transition:transform .3s ease; padding:20px 16px; overflow-y:auto;
+}
+#drawer.open{ transform:none; }
+.drawer-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+.drawer-nav a{
+  display:flex; align-items:center; gap:12px; padding:12px 12px; border-radius:10px;
+  color:var(--muted); text-decoration:none; font-size:14px; font-weight:500; cursor:pointer;
+  border:1px solid transparent;
+}
+.drawer-nav a:hover{ background:var(--emerald-soft); color:var(--text); }
+.drawer-nav a.active{ background:var(--emerald-soft); border-color:var(--line-strong); color:var(--emerald); font-weight:600; }
+.drawer-nav .ic{ width:20px; text-align:center; }
+.drawer-foot{ margin-top:20px; padding-top:16px; border-top:1px solid var(--line); font-size:11.5px; color:var(--muted-dim); font-family:var(--mono); }
+
+/* ============ VIEWS ============ */
+main{ position:relative; z-index:1; padding-bottom:70px; min-height:70vh; }
+.view{ display:none; }
+.view.active{ display:block; animation:viewIn .4s ease; }
+@keyframes viewIn{ from{ opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;} }
+.section-tag{ font-family:var(--mono); font-size:12px; color:var(--cyan); letter-spacing:.14em; text-transform:uppercase; margin-bottom:8px; }
+h2.h{ font-size:clamp(24px,4vw,32px); }
+.lede{ max-width:60ch; }
+
+/* ============ GLASS CARD ============ */
+.card{
+  border:1px solid var(--line); background:var(--panel); backdrop-filter:blur(12px);
+  border-radius:var(--radius); padding:20px 22px; margin-bottom:16px;
+  transition: box-shadow .25s ease, border-color .25s ease, transform .2s ease;
+}
+.card:hover{ border-color:var(--line-strong); box-shadow:0 0 24px -8px var(--emerald-soft); }
+.card h3{ font-size:16.5px; color:var(--text); }
+
+/* ============ BUTTONS ============ */
+.btn{
+  font-family:var(--font); font-weight:600; font-size:13.5px; color:var(--bg);
+  background:var(--emerald); border:none; border-radius:10px; padding:11px 20px;
+  cursor:pointer; transition:box-shadow .2s ease, filter .2s ease, transform .15s ease;
+}
+.btn:hover{ box-shadow:0 0 20px var(--emerald-soft), 0 0 0 1px var(--emerald); filter:brightness(1.05); transform:translateY(-1px); }
+.btn.ghost{ background:transparent; color:var(--text); border:1px solid var(--line); }
+.btn.ghost:hover{ border-color:var(--emerald); color:var(--emerald); }
+.btn.small{ padding:8px 14px; font-size:12.5px; }
+.btn-row{ display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
+
+/* ============ HOME ============ */
+.home-hero{ padding:56px 0 14px; text-align:center; position:relative; }
+.eyebrow{ font-family:var(--mono); font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--emerald); display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:16px; }
+.eyebrow::before,.eyebrow::after{ content:""; width:22px; height:1px; background:var(--emerald); }
+h1.title{ font-size:clamp(32px,7vw,52px); line-height:1.06; }
+h1.title .grad{ background:linear-gradient(90deg,var(--emerald),var(--cyan)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.home-hero .lede{ max-width:52ch; margin:12px auto 0; }
+.start-btn{ margin:28px auto 6px; display:inline-flex; align-items:center; gap:10px; font-weight:700; font-size:15.5px; padding:15px 30px; border-radius:999px; }
+
+.gate-float{ position:absolute; font-family:var(--mono); font-size:12px; font-weight:600; color:var(--emerald); background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:8px 12px; opacity:.7; animation:gateFloat 7s ease-in-out infinite; backdrop-filter:blur(6px); }
+@keyframes gateFloat{ 0%,100%{ transform:translateY(0) rotate(0deg);} 50%{ transform:translateY(-16px) rotate(3deg);} }
+.gf1{ top:6%; left:4%; animation-delay:0s; } .gf2{ top:18%; right:6%; animation-delay:-2s; color:var(--cyan); }
+.gf3{ bottom:12%; left:9%; animation-delay:-4s; color:var(--violet); } .gf4{ bottom:4%; right:10%; animation-delay:-1.5s; color:var(--amber); }
+@media (max-width:640px){ .gate-float{ display:none; } }
+
+.counters{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin:36px 0; }
+@media (min-width:600px){ .counters{ grid-template-columns:repeat(4,1fr); } }
+.counter-card{ border:1px solid var(--line); background:var(--panel); border-radius:var(--radius-sm); padding:18px 10px; text-align:center; }
+.counter-num{ font-family:var(--mono); font-size:26px; font-weight:700; color:var(--emerald); }
+.counter-label{ font-size:11.5px; color:var(--muted); margin-top:4px; }
+
+.nav-cards{ display:grid; grid-template-columns:1fr; gap:14px; padding:14px 0 20px; }
+@media (min-width:640px){ .nav-cards{ grid-template-columns:1fr 1fr; } }
+.nav-card{ text-align:left; display:flex; align-items:flex-start; gap:14px; width:100%; border:1px solid var(--line); background:linear-gradient(180deg,var(--panel),var(--panel-2)); border-radius:var(--radius); padding:18px; cursor:pointer; color:var(--text); backdrop-filter:blur(10px); }
+.nav-card:hover{ border-color:var(--emerald); box-shadow:0 0 22px -6px var(--emerald-soft); transform:translateY(-2px); }
+.nav-card .icon{ width:42px; height:42px; flex:none; display:flex; align-items:center; justify-content:center; border-radius:10px; font-size:19px; background:var(--emerald-soft); border:1px solid var(--line-strong); }
+.nav-card h3{ font-size:15.5px; margin-bottom:3px; }
+.nav-card p{ margin:0; font-size:12.5px; }
+
+footer.site{ padding:26px 0 10px; color:var(--muted-dim); font-size:12px; text-align:center; }
+
+/* ============ THEORY ============ */
+.compare-table{ width:100%; border-collapse:collapse; font-size:13.5px; margin:14px 0; }
+.compare-table th,.compare-table td{ border:1px solid var(--line); padding:10px 12px; text-align:left; }
+.compare-table th{ background:var(--panel-2); color:var(--emerald); font-family:var(--mono); font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
+.compare-table td{ color:var(--muted); }
+.two-col{ display:grid; grid-template-columns:1fr; gap:14px; }
+@media (min-width:640px){ .two-col{ grid-template-columns:1fr 1fr; } }
+.pill-list{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px; }
+.pill-list li{ padding:9px 12px; border-radius:8px; background:var(--panel-2); border:1px solid var(--line); font-size:13.5px; color:var(--muted); }
+.reveal{ opacity:0; transform:translateY(14px); transition:opacity .5s ease, transform .5s ease; }
+.reveal.in{ opacity:1; transform:none; }
+
+/* ============ CONVERSION ============ */
+.tab-row{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px; }
+.tab-btn{ font-family:var(--mono); font-size:12.5px; padding:9px 14px; border-radius:8px; border:1px solid var(--line); background:var(--panel-2); color:var(--muted); cursor:pointer; }
+.tab-btn.active{ background:var(--emerald); color:var(--bg); border-color:var(--emerald); font-weight:600; }
+.tab-panel{ display:none; }
+.tab-panel.active{ display:block; }
+.step-card{ border:1px solid var(--line); background:var(--panel); border-radius:var(--radius-sm); padding:14px 16px; margin-bottom:10px; opacity:0; animation:stepIn .5s ease forwards; }
+@keyframes stepIn{ from{opacity:0; transform:translateX(-10px);} to{opacity:1; transform:none;} }
+.step-card .tag{ font-family:var(--mono); font-size:11px; color:var(--emerald); text-transform:uppercase; letter-spacing:.08em; margin-bottom:4px; }
+textarea.expr-input, input.expr-input{
+  width:100%; font-family:var(--mono); font-size:14px; color:var(--text);
+  background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:12px 14px; outline:none;
+}
+textarea.expr-input:focus, input.expr-input:focus{ border-color:var(--emerald); }
+.field-label{ font-family:var(--mono); font-size:11.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; display:block; }
+.err-msg{ color:var(--pink); font-size:13px; margin-top:8px; }
+
+/* ============ TRUTH TABLE / KMAP shared bits ============ */
+.builder{ border:1px solid var(--line); border-radius:var(--radius); background:linear-gradient(180deg,var(--panel),var(--panel-2)); overflow:hidden; margin-top:6px; backdrop-filter:blur(10px); }
+.builder-head{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; padding:14px 16px; border-bottom:1px solid var(--line); }
+.builder-label{ font-family:var(--mono); font-size:12px; color:var(--muted); }
+.var-select{ display:flex; gap:6px; }
+.var-select button{ font-family:var(--mono); font-size:12.5px; padding:6px 12px; border-radius:7px; border:1px solid var(--line); background:transparent; color:var(--muted); cursor:pointer; }
+.var-select button.active{ color:var(--bg); background:var(--emerald); border-color:var(--emerald); font-weight:600; }
+.builder-body{ padding:16px; }
+.hint{ color:var(--muted-dim); font-size:12px; margin-bottom:10px; }
+table.truth{ width:100%; border-collapse:collapse; font-family:var(--mono); font-size:13px; }
+table.truth th{ text-align:center; color:var(--muted); font-weight:500; padding:6px 4px; border-bottom:1px solid var(--line); font-size:11.5px; }
+table.truth td{ text-align:center; padding:7px 4px; color:var(--muted); }
+table.truth tbody tr{ border-bottom:1px solid var(--line); }
+table.truth tbody tr.zero-row td{ color:var(--amber); }
+.bit-out{ display:inline-flex; align-items:center; justify-content:center; width:28px; height:25px; border-radius:6px; border:1px solid var(--line); background:var(--panel-solid); color:var(--muted); cursor:pointer; font-weight:600; }
+.bit-out.one{ color:var(--emerald); border-color:var(--emerald-dim); box-shadow:inset 0 0 0 1px var(--emerald-dim); }
+.bit-out.zero{ color:var(--amber); border-color:var(--amber-dim); box-shadow:inset 0 0 0 1px var(--amber-dim); }
+.row-idx{ color:var(--muted-dim); }
+.output-block{ margin-top:16px; display:flex; flex-direction:column; gap:14px; }
+.panel-title{ font-family:var(--mono); font-size:11.5px; color:var(--muted); letter-spacing:.06em; text-transform:uppercase; margin-bottom:8px; }
+.maxterm-list{ display:flex; flex-wrap:wrap; gap:8px; }
+.maxterm-chip{ font-family:var(--mono); font-size:12px; padding:5px 9px; border-radius:6px; border:1px solid var(--line-strong); color:var(--cyan); background:rgba(99,224,255,0.06); }
+.expr-box{ border:1px solid var(--emerald-dim); background:var(--emerald-soft); border-radius:8px; padding:14px; font-family:var(--mono); font-size:14px; color:var(--emerald); word-break:break-word; min-height:48px; display:flex; align-items:center; }
+.expr-shorthand{ font-family:var(--mono); font-size:12.5px; color:var(--muted); }
+.expr-shorthand span{ color:var(--cyan); }
+
+/* ============ K-MAP GRID ============ */
+.kmap-wrap{ overflow-x:auto; padding:6px 0; }
+.kmap-grid{ border-collapse:collapse; margin:0 auto; font-family:var(--mono); }
+.kmap-grid th{ font-size:11px; color:var(--muted); padding:4px 8px; font-weight:500; }
+.kmap-grid td{ position:relative; width:56px; height:52px; text-align:center; border:1px solid var(--line); cursor:pointer; font-size:16px; font-weight:600; color:var(--muted); background:var(--panel-solid); }
+.kmap-grid td.zero{ color:var(--amber); background:rgba(255,177,87,0.08); }
+.kmap-grid td.one{ color:var(--emerald); }
+.kmap-corner{ font-size:10px !important; color:var(--muted-dim) !important; font-weight:400 !important; }
+.grp-dots{ position:absolute; top:3px; right:3px; display:flex; gap:2px; }
+.grp-dot{ width:7px; height:7px; border-radius:50%; opacity:0; animation:dotIn .4s ease forwards; box-shadow:0 0 5px currentColor; }
+@keyframes dotIn{ from{opacity:0; transform:scale(0);} to{opacity:1; transform:scale(1);} }
+.kmap-legend{ display:flex; flex-direction:column; gap:8px; margin-top:16px; }
+.legend-row{ display:flex; align-items:center; gap:10px; font-family:var(--mono); font-size:12.5px; color:var(--muted); opacity:0; animation:dotIn .4s ease forwards; }
+.legend-swatch{ width:14px; height:14px; border-radius:4px; flex:none; box-shadow:0 0 6px currentColor; }
+.group-c0{ color:var(--emerald); } .group-c1{ color:var(--cyan); } .group-c2{ color:var(--pink); }
+.group-c3{ color:var(--violet); } .group-c4{ color:var(--gold); } .group-c5{ color:#ff8b5c; }
+
+/* ============ QUIZ ============ */
+.quiz-shell{ border:1px solid var(--line); border-radius:var(--radius); background:var(--panel); overflow:hidden; margin-top:6px; backdrop-filter:blur(10px); }
+.quiz-head{ display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--line); gap:10px; flex-wrap:wrap; }
+.score{ font-family:var(--mono); font-size:12.5px; color:var(--muted); }
+.score span{ color:var(--emerald); }
+.quiz-body{ padding:20px 18px; }
+.qtype-tag{ display:inline-block; font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--cyan); border:1px solid var(--line-strong); border-radius:6px; padding:3px 8px; margin-bottom:10px; }
+.quiz-prompt{ font-size:15px; color:var(--text); margin-bottom:14px; }
+.options{ display:grid; gap:9px; }
+.opt{ text-align:left; font-family:var(--font); font-size:13.5px; color:var(--text); background:var(--panel-2); border:1px solid var(--line); border-radius:8px; padding:11px 13px; cursor:pointer; width:100%; }
+.opt:hover:not(:disabled){ border-color:var(--emerald); }
+.opt.correct{ border-color:var(--emerald); background:var(--emerald-soft); color:var(--emerald); }
+.opt.wrong{ border-color:var(--pink); background:rgba(255,107,157,0.08); color:var(--pink); }
+.opt:disabled{ cursor:default; }
+.fib-row{ display:flex; gap:10px; flex-wrap:wrap; }
+.feedback{ margin-top:12px; font-size:13px; color:var(--muted); min-height:20px; }
+.feedback.good{ color:var(--emerald); } .feedback.bad{ color:var(--pink); }
+.quiz-actions{ margin-top:16px; display:flex; gap:10px; flex-wrap:wrap; }
+.quiz-progress-bar{ height:5px; border-radius:4px; background:var(--panel-2); overflow:hidden; margin-bottom:14px; }
+.quiz-progress-fill{ height:100%; background:linear-gradient(90deg,var(--emerald),var(--cyan)); transition:width .3s ease; }
+
+/* ============ TOASTS ============ */
+#toastHost{ position:fixed; bottom:22px; left:50%; transform:translateX(-50%); z-index:80; display:flex; flex-direction:column; gap:8px; align-items:center; width:100%; pointer-events:none; }
+.toast{ background:var(--panel-solid); border:1px solid var(--line-strong); color:var(--text); font-size:13px; padding:10px 18px; border-radius:999px; box-shadow:0 8px 24px -8px rgba(0,0,0,.5); opacity:0; transform:translateY(10px); transition:opacity .25s ease, transform .25s ease; }
+.toast.show{ opacity:1; transform:none; }
+
+/* ============ MISC ============ */
+.badge{ display:inline-block; font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--emerald); border:1px solid var(--line-strong); padding:3px 8px; border-radius:6px; margin-left:8px; }
+.example-card{ border:1px solid var(--line); background:var(--panel); border-radius:var(--radius); padding:18px; margin-bottom:16px; }
+.example-card h4{ font-size:14.5px; color:var(--text); margin-bottom:8px; }
+.example-grid{ display:grid; grid-template-columns:1fr; gap:16px; margin-top:10px; }
+@media (min-width:720px){ .example-grid{ grid-template-columns:1fr 1fr; } }
+.mini-kmap td{ width:36px; height:34px; font-size:12px; }
+.mini-kmap th{ font-size:9.5px; }
+.final-line{ font-family:var(--mono); font-size:13px; color:var(--emerald); background:var(--emerald-soft); border:1px solid var(--emerald-dim); border-radius:7px; padding:9px 12px; margin-top:6px; word-break:break-word; }
+
+@media print{
+  .app-bar, #drawer, #drawerOverlay, #scrollProgress, #toTop, #toastHost, #loader, .backdrop, .btn, .btn-row, .nav-cards, .start-btn, .var-select, .tab-row{ display:none !important; }
+  body{ background:#fff; color:#000; }
+  .view{ display:none !important; }
+  .view.print-target{ display:block !important; }
+  .card{ border:1px solid #999; break-inside:avoid; }
+}
+
+@media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; } }
+</style>
+</head>
+<body>
+
+<div class="backdrop" aria-hidden="true">
+  <div class="glow g1"></div><div class="glow g2"></div><div class="glow g3"></div>
+  <div id="particleField"></div>
+</div>
+
+<div id="loader"><div class="spin-logo"></div><div class="loader-text">Loading POSVerse…</div></div>
+
+<div id="scrollProgress"></div>
+<div id="toastHost" aria-live="polite"></div>
+
+<div id="drawerOverlay"></div>
+<nav id="drawer" aria-label="Site navigation">
+  <div class="drawer-head">
+    <div class="brand"><span class="dot"></span>POS<span class="accent">Verse</span></div>
+    <button class="icon-btn" id="drawerClose" aria-label="Close menu">✕</button>
+  </div>
+  <div class="drawer-nav" id="drawerNav">
+    <a data-target="home"><span class="ic">🏠</span>Home</a>
+    <a data-target="theory"><span class="ic">📖</span>Theory</a>
+    <a data-target="conversion"><span class="ic">🔄</span>Conversion Steps</a>
+    <a data-target="truthtable"><span class="ic">📊</span>Truth Table Generator</a>
+    <a data-target="kmap"><span class="ic">🧩</span>K-Map Solver</a>
+    <a data-target="calculator"><span class="ic">🧮</span>POS Calculator</a>
+    <a data-target="examples"><span class="ic">✅</span>Solved Examples</a>
+    <a data-target="quiz"><span class="ic">📝</span>Quiz</a>
+    <a data-target="about"><span class="ic">ℹ️</span>About</a>
+  </div>
+  <div class="drawer-foot">Shortcuts: 1–9 jump pages · D theme · / search · Esc close</div>
+</nav>
+
+<div class="app-bar">
+  <div class="app-bar-left">
+    <button class="icon-btn" id="menuBtn" aria-label="Open menu">☰</button>
+    <div class="brand"><span class="dot"></span>POS<span class="accent">Verse</span></div>
+  </div>
+  <div class="searchbox">
+    <span style="color:var(--muted-dim); font-size:13px;">🔍</span>
+    <input id="searchInput" placeholder="Search pages…" aria-label="Search pages">
+  </div>
+  <div class="app-bar-right">
+    <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode" aria-pressed="true">🌙</button>
+  </div>
+</div>
+
+<main id="app">
+
+<!-- ================= HOME ================= -->
+<section class="view active" id="view-home">
+  <div class="wrap">
+    <div class="home-hero">
+      <span class="gate-float gf1">AND</span><span class="gate-float gf2">OR</span>
+      <span class="gate-float gf3">NOT</span><span class="gate-float gf4">XOR</span>
+      <div class="eyebrow">Digital Electronics · Boolean Algebra</div>
+      <h1 class="title">Canonical <span class="grad">Product of Sums</span></h1>
+      <p class="lede">A premium interactive platform to learn maxterms, convert expressions, solve K-Maps with a real Quine–McCluskey engine, and test yourself — built for engineering students.</p>
+      <button class="btn start-btn" id="startBtn">🚀 Start Learning</button>
+    </div>
+
+    <div class="counters">
+      <div class="counter-card"><div class="counter-num" data-count="8">0</div><div class="counter-label">Interactive Tools</div></div>
+      <div class="counter-card"><div class="counter-num" data-count="15">0</div><div class="counter-label">Solved Examples</div></div>
+      <div class="counter-card"><div class="counter-num" data-count="22">0</div><div class="counter-label">Quiz Questions</div></div>
+      <div class="counter-card"><div class="counter-num" data-count="4">0</div><div class="counter-label">Variable Modes</div></div>
+    </div>
+
+    <div class="nav-cards">
+      <button class="nav-card" data-target="theory"><span class="icon">📖</span><span><h3>Theory</h3><p>Boolean algebra, SOP vs POS, maxterms, pros & cons.</p></span></button>
+      <button class="nav-card" data-target="conversion"><span class="icon">🔄</span><span><h3>Conversion Steps</h3><p>Truth table, expression, standard POS &amp; SOP → canonical POS.</p></span></button>
+      <button class="nav-card" data-target="truthtable"><span class="icon">📊</span><span><h3>Truth Table Generator</h3><p>2/3/4-variable tables built and toggled live.</p></span></button>
+      <button class="nav-card" data-target="kmap"><span class="icon">🧩</span><span><h3>K-Map Solver</h3><p>Real Quine–McCluskey grouping, color-coded, animated.</p></span></button>
+      <button class="nav-card" data-target="calculator"><span class="icon">🧮</span><span><h3>POS Calculator</h3><p>From maxterms or a raw Boolean expression.</p></span></button>
+      <button class="nav-card" data-target="examples"><span class="icon">✅</span><span><h3>Solved Examples</h3><p>15 worked problems with table, K-map &amp; final answer.</p></span></button>
+      <button class="nav-card" data-target="quiz"><span class="icon">📝</span><span><h3>Quiz</h3><p>MCQ, true/false and fill-in-the-blank with instant feedback.</p></span></button>
+      <button class="nav-card" data-target="about"><span class="icon">ℹ️</span><span><h3>About</h3><p>Shortcuts, credits and how this tool works.</p></span></button>
+    </div>
+  </div>
+  <footer class="site">POSVerse — an interactive Boolean algebra &amp; digital electronics reference.</footer>
+</section>
+
+<!-- ================= THEORY ================= -->
+<section class="view" id="view-theory">
+  <div class="wrap-narrow">
+    <div class="section-tag">Theory</div>
+    <h2 class="h">Boolean Algebra &amp; Product of Sums</h2>
+    <p class="reveal">Boolean algebra works with two values, 0 and 1, combined using AND (·), OR (+) and NOT ('). Any digital logic function can be expressed purely in terms of these operators — and two standard ways of doing that are <strong style="color:var(--text)">Sum of Products (SOP)</strong> and <strong style="color:var(--text)">Product of Sums (POS)</strong>.</p>
+
+    <div class="card reveal"><h3>Product of Sums (POS)</h3><p>A POS expression is an AND of OR terms, e.g. <span class="mono">(A+B)·(A'+C)</span>. The terms don't need to contain every variable — that's what separates <em>standard</em> POS from <em>canonical</em> POS.</p></div>
+
+    <div class="card reveal"><h3>Canonical Product of Sums</h3><p>A <strong style="color:var(--text)">canonical</strong> POS is stricter: every sum term — called a <strong style="color:var(--text)">maxterm</strong> — must contain <em>every</em> variable of the function exactly once, complemented or not.</p>
+      <div class="compare-table" style="border:1px solid var(--line); border-radius:8px; overflow:hidden;">
+        <table style="width:100%; border-collapse:collapse;">
+          <tr><th style="background:var(--panel-2); color:var(--emerald); font-family:var(--mono); padding:8px 10px; text-align:left; font-size:12px;">Variable value in zero-row</th><th style="background:var(--panel-2); color:var(--emerald); font-family:var(--mono); padding:8px 10px; text-align:left; font-size:12px;">Literal written in maxterm</th></tr>
+          <tr><td style="padding:8px 10px; border-top:1px solid var(--line); color:var(--muted);">X = 1</td><td style="padding:8px 10px; border-top:1px solid var(--line); color:var(--muted);"><span class="mono bar">X</span> (complemented)</td></tr>
+          <tr><td style="padding:8px 10px; border-top:1px solid var(--line); color:var(--muted);">X = 0</td><td style="padding:8px 10px; border-top:1px solid var(--line); color:var(--muted);"><span class="mono">X</span> (plain)</td></tr>
+        </table>
+      </div>
+      <p style="margin-top:10px;">Shorthand: <span class="mono">F = Π M(list of zero-row indices)</span> — "the product of maxterms."</p>
+    </div>
+
+    <div class="card reveal"><h3>Maxterms</h3><p>Each maxterm evaluates to <span class="mono">0</span> for exactly one input combination (the row it came from) and <span class="mono">1</span> everywhere else. AND-ing all of them together forces the function to <span class="mono">0</span> only where the truth table says it should be — nowhere else.</p></div>
+
+    <div class="section-tag reveal" style="margin-top:26px;">Comparison</div>
+    <h2 class="h reveal">Standard POS vs Canonical POS</h2>
+    <table class="compare-table reveal">
+      <tr><th>Standard POS</th><th>Canonical POS</th></tr>
+      <tr><td>Sum terms may omit variables</td><td>Every sum term contains all variables</td></tr>
+      <tr><td>Usually shorter / simplified</td><td>Longer, unique form (one per function)</td></tr>
+      <tr><td>Produced by simplification (e.g. K-map)</td><td>Read directly off the zero rows of a truth table</td></tr>
+    </table>
+
+    <h2 class="h reveal" style="margin-top:26px;">SOP vs POS</h2>
+    <table class="compare-table reveal">
+      <tr><th>Aspect</th><th>SOP</th><th>POS</th></tr>
+      <tr><td>Built from</td><td>Minterms (rows where F=1)</td><td>Maxterms (rows where F=0)</td></tr>
+      <tr><td>Structure</td><td>OR of AND terms</td><td>AND of OR terms</td></tr>
+      <tr><td>Shorthand</td><td>F = Σ m(...)</td><td>F = Π M(...)</td></tr>
+      <tr><td>Preferred when</td><td>Few 1s in the table</td><td>Few 0s in the table</td></tr>
+    </table>
+
+    <div class="two-col" style="margin-top:26px;">
+      <div class="card reveal"><h3>Advantages</h3><ul class="pill-list">
+        <li>Unique, unambiguous representation of any function</li>
+        <li>Directly derivable from a truth table</li>
+        <li>Convenient starting point for K-map simplification</li>
+        <li>Efficient when the function is mostly 1s (few zero rows)</li>
+      </ul></div>
+      <div class="card reveal"><h3>Disadvantages</h3><ul class="pill-list">
+        <li>Can be long and hard to read for many variables</li>
+        <li>Rarely the most efficient circuit — needs simplification</li>
+        <li>Grows exponentially with variable count</li>
+      </ul></div>
+    </div>
+
+    <div class="card reveal" style="margin-top:16px;"><h3>Applications in Digital Electronics</h3><ul class="pill-list">
+      <li>Designing combinational logic circuits from specifications</li>
+      <li>Deriving minimal NOR-gate implementations (POS maps naturally to NOR logic)</li>
+      <li>Verifying and documenting logic behind PLDs / FPGAs</li>
+      <li>Teaching foundation for Karnaugh maps and Quine–McCluskey minimization</li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- ================= CONVERSION ================= -->
+<section class="view" id="view-conversion">
+  <div class="wrap-narrow">
+    <div class="section-tag">Conversion</div>
+    <h2 class="h">Step-by-step conversion to Canonical POS</h2>
+    <p>One engine, three doors in: build from a truth table, or type any Boolean expression — standard POS, SOP, or mixed — and watch it convert.</p>
+
+    <div class="tab-row" id="convTabs">
+      <button class="tab-btn active" data-tab="tt">Truth Table → Canonical POS</button>
+      <button class="tab-btn" data-tab="expr">Expression → Canonical POS</button>
+      <button class="tab-btn" data-tab="stdpos">Standard POS → Canonical POS</button>
+      <button class="tab-btn" data-tab="sop">SOP → POS</button>
+    </div>
+
+    <div class="tab-panel active" id="tab-tt">
+      <p>Use the <button class="btn ghost small" data-target="truthtable" style="display:inline;">Truth Table Generator →</button> to build a table and derive the canonical POS live, row by row, from zero-outputs to maxterms to the final product.</p>
+    </div>
+
+    <div class="tab-panel" id="tab-expr">
+      <p>Type any Boolean expression (variables A–D, <span class="mono">+</span> for OR, <span class="mono">.</span> or juxtaposition for AND, <span class="mono">'</span> or <span class="mono">!</span> for NOT). Works for expression, standard-POS, or SOP input alike.</p>
+      <div id="exprConverter"></div>
+    </div>
+    <div class="tab-panel" id="tab-stdpos">
+      <p>Example: a simplified/standard POS from a K-map, like <span class="mono">(A+B)(A'+C)</span>, expanded back into full canonical maxterms.</p>
+      <div id="stdposConverter"></div>
+    </div>
+    <div class="tab-panel" id="tab-sop">
+      <p>Example: an SOP expression like <span class="mono">A'B + AC'</span>, converted into its equivalent canonical POS.</p>
+      <div id="sopConverter"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TRUTH TABLE ================= -->
+<section class="view" id="view-truthtable">
+  <div class="wrap-narrow">
+    <div class="section-tag">Truth Table Generator</div>
+    <h2 class="h">Truth table → maxterms → canonical POS</h2>
+    <p>Pick a variable count, click any output bit to flip it — everything updates instantly.</p>
+    <div class="builder">
+      <div class="builder-head">
+        <div class="builder-label">F(<span id="ttVarlabel">A, B, C</span>)</div>
+        <div class="var-select" id="ttVarSelect">
+          <button data-n="2">2 vars</button><button data-n="3" class="active">3 vars</button><button data-n="4">4 vars</button>
+        </div>
+      </div>
+      <div class="builder-body">
+        <div class="hint">Amber rows are the zero rows — each becomes one maxterm.</div>
+        <table class="truth"><thead><tr id="ttTheadRow"></tr></thead><tbody id="ttTbody"></tbody></table>
+        <div class="output-block">
+          <div><div class="panel-title">Maxterms (zero rows)</div><div class="maxterm-list" id="ttMaxtermList"></div></div>
+          <div><div class="panel-title">Canonical Product of Sums</div><div class="expr-box" id="ttExprBox"></div></div>
+          <div class="expr-shorthand" id="ttShorthand"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= K-MAP ================= -->
+<section class="view" id="view-kmap">
+  <div class="wrap-narrow">
+    <div class="section-tag">Karnaugh Map Solver</div>
+    <h2 class="h">Group the zeros, read off the POS</h2>
+    <p>Click a cell to toggle it. Groups are found with a real Quine–McCluskey engine (handles wraparound automatically) and color-coded on the grid.</p>
+
+    <div class="builder">
+      <div class="builder-head">
+        <div class="builder-label">K-Map for F(<span id="kmVarlabel">A, B, C</span>)</div>
+        <div class="var-select" id="kmVarSelect">
+          <button data-n="2">2 vars</button><button data-n="3" class="active">3 vars</button><button data-n="4">4 vars</button>
+        </div>
+      </div>
+      <div class="builder-body">
+        <div class="hint">Row/column headers use Gray code — hover a header to highlight its line.</div>
+        <div class="kmap-wrap"><table class="kmap-grid" id="kmapGrid"></table></div>
+        <div class="btn-row">
+          <button class="btn ghost small" id="kmRandomBtn">🎲 Random example</button>
+          <button class="btn ghost small" id="kmResetBtn">↺ Reset</button>
+        </div>
+        <div class="output-block">
+          <div><div class="panel-title">Canonical POS</div><div class="expr-box" id="kmCanonicalBox"></div></div>
+          <div><div class="panel-title">Simplified POS (from grouping)</div><div class="expr-box" id="kmSimplifiedBox" style="color:var(--cyan); border-color:var(--line-strong); background:rgba(99,224,255,0.06);"></div></div>
+          <div>
+            <div class="panel-title">Grouping steps</div>
+            <div class="kmap-legend" id="kmLegend"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CALCULATOR ================= -->
+<section class="view" id="view-calculator">
+  <div class="wrap-narrow">
+    <div class="section-tag">POS Calculator</div>
+    <h2 class="h">From maxterms or a raw expression</h2>
+
+    <div class="tab-row" id="calcTabs">
+      <button class="tab-btn active" data-tab="mt">By Maxterms</button>
+      <button class="tab-btn" data-tab="ex">By Expression</button>
+    </div>
+
+    <div class="tab-panel active" id="calctab-mt">
+      <label class="field-label">Variable count</label>
+      <div class="var-select" id="calcVarSelect" style="margin-bottom:12px;">
+        <button data-n="2">2</button><button data-n="3" class="active">3</button><button data-n="4">4</button>
+      </div>
+      <label class="field-label">Maxterm indices (comma-separated)</label>
+      <input class="expr-input" id="calcMtInput" placeholder="e.g. 1, 4, 6">
+      <div class="btn-row"><button class="btn" id="calcMtRun">Generate</button><button class="btn ghost" id="calcMtReset">Reset</button></div>
+      <div id="calcMtOut" style="margin-top:16px;"></div>
+    </div>
+
+    <div class="tab-panel" id="calctab-ex">
+      <label class="field-label">Boolean expression</label>
+      <textarea class="expr-input" id="calcExInput" rows="2" placeholder="e.g. (A+B)(A'+C) or A'B + AC'"></textarea>
+      <div class="btn-row"><button class="btn" id="calcExRun">Convert</button><button class="btn ghost" id="calcExReset">Reset</button></div>
+      <div id="calcExOut" style="margin-top:16px;"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= EXAMPLES ================= -->
+<section class="view" id="view-examples">
+  <div class="wrap-narrow">
+    <div class="section-tag">Solved Examples</div>
+    <h2 class="h">15 worked problems</h2>
+    <p>Every table, K-map and answer below is computed live by the same engine used elsewhere on this site — not hardcoded text.</p>
+    <div id="examplesHost"></div>
+  </div>
+</section>
+
+<!-- ================= QUIZ ================= -->
+<section class="view" id="view-quiz">
+  <div class="wrap-narrow">
+    <div class="section-tag">Quiz</div>
+    <h2 class="h">Test your understanding</h2>
+    <div class="quiz-shell">
+      <div class="quiz-head">
+        <div class="builder-label" id="quizPos">Question 1 of 22</div>
+        <div class="score">Score: <span id="quizScore">0</span> / <span id="quizTotal">0</span></div>
+      </div>
+      <div class="quiz-body">
+        <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="quizProgressFill" style="width:0%;"></div></div>
+        <div id="quizArea"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ABOUT ================= -->
+<section class="view" id="view-about">
+  <div class="wrap-narrow">
+    <div class="section-tag">About</div>
+    <h2 class="h">About POSVerse</h2>
+    <div class="card"><p>POSVerse is a single-file, self-contained learning tool for Canonical Product of Sums: theory, guided conversions, a truth-table generator, a real Quine–McCluskey K-Map solver, a POS calculator, 15 solved examples, and a 22-question quiz.</p></div>
+    <div class="card"><h3>Keyboard shortcuts</h3><ul class="pill-list">
+      <li><span class="mono">1–9</span> — jump to a page (in nav order)</li>
+      <li><span class="mono">D</span> — toggle dark / light mode</li>
+      <li><span class="mono">/</span> — focus the search box</li>
+      <li><span class="mono">Esc</span> — close the menu</li>
+    </ul></div>
+    <div class="card"><h3>Notes</h3><p>"Download Notes as PDF" and "Print Page" both use your browser's native print dialog — choose "Save as PDF" as the destination for a PDF file. The K-Map solver's grouping uses a real Quine–McCluskey prime-implicant search (essential PIs + greedy cover), not a lookup table.</p></div>
+    <div class="btn-row"><button class="btn ghost" id="downloadPdfBtn">⬇ Download Notes (PDF)</button><button class="btn ghost" id="printBtn">🖨 Print Page</button></div>
+  </div>
+</section>
+
+</main>
+
+<button id="toTop" aria-label="Scroll to top">↑</button>
+
+<script>
+(function(){
+"use strict";
+
+/* =========================================================
+   ENGINE — shared logic used across every page
+   ========================================================= */
+const ALL_VARS = ["A","B","C","D"];
+
+function bitsOf(row, n){ const b=[]; for(let i=n-1;i>=0;i--) b.push((row>>i)&1); return b; }
+function idxFromBits(bits){ return bits.reduce((a,b)=>(a<<1)|b,0); }
+
+function maxtermText(bits, vars){ return "(" + bits.map((b,i)=> b===1? vars[i]+"'" : vars[i]).join(" + ") + ")"; }
+function maxtermHTML(bits, vars){ return "(" + bits.map((b,i)=> b===1? `<span class="bar">${vars[i]}</span>` : vars[i]).join(" + ") + ")"; }
+
+function canonicalPOS(n, outputs){
+  const vars = ALL_VARS.slice(0,n);
+  const zeroRows = []; for(let i=0;i<outputs.length;i++) if(outputs[i]===0) zeroRows.push(i);
+  if(zeroRows.length===0) return { zeroRows, text:"F = 1", html:"F = 1", shorthand:"" };
+  if(zeroRows.length===outputs.length) return { zeroRows, text:"F = 0", html:"F = 0", shorthand:"" };
+  const text = "F = " + zeroRows.map(r=>maxtermText(bitsOf(r,n), vars)).join(" \u00B7 ");
+  const html = "F = " + zeroRows.map(r=>maxtermHTML(bitsOf(r,n), vars)).join(" &middot; ");
+  const shorthand = `F = &Pi; M(${zeroRows.join(", ")})`;
+  return { zeroRows, text, html, shorthand };
+}
+
+/* ---- Quine–McCluskey for POS simplification (groups zero-rows) ---- */
+function combineTerms(t1,t2){
+  const len=t1.bits.length; let diffPos=-1, diffCount=0;
+  for(let i=0;i<len;i++){
+    if(t1.bits[i]!==t2.bits[i]){ diffCount++; diffPos=i; if(diffCount>1) return null; }
+  }
+  if(diffCount!==1) return null;
+  const arr=t1.bits.split(""); arr[diffPos]="-";
+  const mt=new Set([...t1.mt, ...t2.mt]);
+  return { bits: arr.join(""), mt };
+}
+
+function quineMcCluskey(n, zeroRows){
+  let current = zeroRows.map(idx=>({ bits: idx.toString(2).padStart(n,"0"), mt:new Set([idx]) }));
+  const primesMap = new Map();
+  while(current.length){
+    const buckets={};
+    current.forEach(t=>{ const ones=(t.bits.match(/1/g)||[]).length; (buckets[ones]=buckets[ones]||[]).push(t); });
+    const keys = Object.keys(buckets).map(Number).sort((a,b)=>a-b);
+    const used = new Set(); const nextMap = new Map();
+    for(let k=0;k<keys.length-1;k++){
+      if(keys[k+1]-keys[k]!==1) continue;
+      for(const t1 of buckets[keys[k]]) for(const t2 of buckets[keys[k+1]]){
+        const c = combineTerms(t1,t2);
+        if(c){
+          used.add(t1.bits); used.add(t2.bits);
+          if(nextMap.has(c.bits)) c.mt.forEach(m=>nextMap.get(c.bits).mt.add(m));
+          else nextMap.set(c.bits, c);
+        }
+      }
+    }
+    current.forEach(t=>{ if(!used.has(t.bits) && !primesMap.has(t.bits)) primesMap.set(t.bits, t); });
+    current = Array.from(nextMap.values());
+  }
+  return Array.from(primesMap.values());
+}
+
+function selectCover(primes, zeroRows){
+  const coverage = new Map(); zeroRows.forEach(idx=>coverage.set(idx, []));
+  primes.forEach((p,pi)=>{ p.mt.forEach(idx=>{ if(coverage.has(idx)) coverage.get(idx).push(pi); }); });
+  const selected = new Set(); const essential = new Set();
+  coverage.forEach((list)=>{ if(list.length===1) { selected.add(list[0]); essential.add(list[0]); } });
+  let covered = new Set(); selected.forEach(pi=>primes[pi].mt.forEach(m=>covered.add(m)));
+  let remaining = zeroRows.filter(idx=>!covered.has(idx));
+  while(remaining.length){
+    let best=-1, bestCount=-1;
+    primes.forEach((p,pi)=>{ if(selected.has(pi)) return; const c=remaining.filter(idx=>p.mt.has(idx)).length; if(c>bestCount){bestCount=c; best=pi;} });
+    if(best===-1) break;
+    selected.add(best); primes[best].mt.forEach(m=>covered.add(m));
+    remaining = zeroRows.filter(idx=>!covered.has(idx));
+  }
+  return { selectedIdxs: Array.from(selected), essential };
+}
+
+function primeToTerm(bits, vars){
+  const parts=[]; bits.split("").forEach((b,i)=>{ if(b==="1") parts.push(vars[i]+"'"); else if(b==="0") parts.push(vars[i]); });
+  if(parts.length===0) return "0";
+  return "(" + parts.join(" + ") + ")";
+}
+function primeToHTML(bits, vars){
+  const parts=[]; bits.split("").forEach((b,i)=>{ if(b==="1") parts.push(`<span class="bar">${vars[i]}</span>`); else if(b==="0") parts.push(vars[i]); });
+  if(parts.length===0) return "0";
+  return "(" + parts.join(" + ") + ")";
+}
+
+const GROUP_COLORS = ["#12f296","#63e0ff","#ff6b9d","#b98bff","#ffe066","#ff8b5c"];
+
+function computeSimplified(n, outputs){
+  const vars = ALL_VARS.slice(0,n);
+  const zeroRows=[]; for(let i=0;i<outputs.length;i++) if(outputs[i]===0) zeroRows.push(i);
+  if(zeroRows.length===0) return { groups:[], text:"F = 1", html:"F = 1" };
+  if(zeroRows.length===outputs.length) return { groups:[], text:"F = 0", html:"F = 0" };
+  const primes = quineMcCluskey(n, zeroRows);
+  const { selectedIdxs, essential } = selectCover(primes, zeroRows);
+  const groups = selectedIdxs.map((pi,i)=>({
+    bits: primes[pi].bits, mt: primes[pi].mt, essential: essential.has(pi),
+    color: GROUP_COLORS[i % GROUP_COLORS.length],
+    term: primeToTerm(primes[pi].bits, vars), termHTML: primeToHTML(primes[pi].bits, vars),
+    size: Math.pow(2, (primes[pi].bits.match(/-/g)||[]).length)
+  }));
+  const text = "F = " + groups.map(g=>g.term).join(" \u00B7 ");
+  const html = "F = " + groups.map(g=>g.termHTML).join(" &middot; ");
+  return { groups, text, html };
+}
+
+/* ---- Boolean expression parser (handles SOP / POS / mixed) ---- */
+function tokenize(str){
+  const toks=[]; 
+  for(let i=0;i<str.length;i++){
+    const c=str[i];
+    if(/\s/.test(c)) continue;
+    if(/[A-Za-z]/.test(c)) toks.push({type:"VAR", value:c.toUpperCase()});
+    else if(c==="'") toks.push({type:"POSTFIX_NOT"});
+    else if(c==="!" || c==="~") toks.push({type:"PREFIX_NOT"});
+    else if(c==="." || c==="*") toks.push({type:"AND"});
+    else if(c==="+") toks.push({type:"OR"});
+    else if(c==="(") toks.push({type:"LP"});
+    else if(c===")") toks.push({type:"RP"});
+    /* ignore anything else leniently */
+  }
+  return toks;
+}
+function parseTokens(tokens){
+  let pos=0;
+  const peek=()=>tokens[pos];
+  const consume=()=>tokens[pos++];
+  function isFactorStart(t){ return t && (t.type==="VAR"||t.type==="LP"||t.type==="PREFIX_NOT"); }
+  function parseExpr(){
+    let node=parseTerm();
+    while(peek() && peek().type==="OR"){ consume(); node={type:"OR", l:node, r:parseTerm()}; }
+    return node;
+  }
+  function parseTerm(){
+    let node=parseFactor();
+    while(peek() && peek().type==="AND"){ consume(); node={type:"AND", l:node, r:parseFactor()}; }
+    while(peek() && isFactorStart(peek())){ node={type:"AND", l:node, r:parseFactor()}; }
+    return node;
+  }
+  function parseFactor(){
+    let node;
+    if(peek() && peek().type==="PREFIX_NOT"){ consume(); node={type:"NOT", n:parseFactor()}; }
+    else if(peek() && peek().type==="LP"){ consume(); node=parseExpr(); if(peek()&&peek().type==="RP") consume(); }
+    else if(peek() && peek().type==="VAR"){ node={type:"VAR", name:consume().value}; }
+    else throw new Error("Unexpected token near position "+pos);
+    while(peek() && peek().type==="POSTFIX_NOT"){ consume(); node={type:"NOT", n:node}; }
+    return node;
+  }
+  if(!tokens.length) throw new Error("Empty expression");
+  const ast=parseExpr();
+  if(pos<tokens.length) throw new Error("Unexpected trailing input");
+  return ast;
+}
+function evalAst(node, vals){
+  switch(node.type){
+    case "VAR": return vals[node.name];
+    case "NOT": return evalAst(node.n, vals)?0:1;
+    case "AND": return (evalAst(node.l,vals) && evalAst(node.r,vals))?1:0;
+    case "OR": return (evalAst(node.l,vals) || evalAst(node.r,vals))?1:0;
+  }
+}
+function truthFromExpression(str){
+  const tokens = tokenize(str);
+  const varsSet = new Set(tokens.filter(t=>t.type==="VAR").map(t=>t.value));
+  const vars = Array.from(varsSet).sort();
+  if(vars.length===0) throw new Error("No variables found in expression.");
+  if(vars.length>4) throw new Error("Supports up to 4 variables (A–D).");
+  const ast = parseTokens(tokens);
+  const n = vars.length; const outputs=[];
+  for(let row=0; row<Math.pow(2,n); row++){
+    const bits=bitsOf(row,n); const vals={}; vars.forEach((v,i)=>vals[v]=bits[i]);
+    outputs.push(evalAst(ast, vals));
+  }
+  return { vars, outputs, n };
+}
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+const pageOrder = ["home","theory","conversion","truthtable","kmap","calculator","examples","quiz","about"];
+const titles = { home:"POSVerse", theory:"Theory", conversion:"Conversion Steps", truthtable:"Truth Table Generator", kmap:"K-Map Solver", calculator:"POS Calculator", examples:"Solved Examples", quiz:"Quiz", about:"About" };
+
+function goTo(view){
+  document.querySelectorAll(".view").forEach(v=>{ v.classList.remove("active"); v.classList.remove("print-target"); });
+  const target=document.getElementById("view-"+view);
+  target.classList.add("active"); target.classList.add("print-target");
+  document.querySelectorAll(".drawer-nav a").forEach(a=>a.classList.toggle("active", a.dataset.target===view));
+  closeDrawer();
+  window.scrollTo({top:0, behavior:"auto"});
+  triggerReveals();
+}
+document.querySelectorAll("[data-target]").forEach(el=>{
+  el.addEventListener("click", ()=> goTo(el.dataset.target));
+});
+document.getElementById("startBtn").addEventListener("click", ()=> goTo("theory"));
+
+/* Drawer */
+const drawer=document.getElementById("drawer"), overlay=document.getElementById("drawerOverlay");
+function openDrawer(){ drawer.classList.add("open"); overlay.classList.add("show"); }
+function closeDrawer(){ drawer.classList.remove("open"); overlay.classList.remove("show"); }
+document.getElementById("menuBtn").addEventListener("click", openDrawer);
+document.getElementById("drawerClose").addEventListener("click", closeDrawer);
+overlay.addEventListener("click", closeDrawer);
+
+/* Theme toggle */
+const themeToggle=document.getElementById("themeToggle");
+themeToggle.addEventListener("click", ()=>{
+  const isLight=document.body.classList.toggle("light");
+  themeToggle.textContent = isLight ? "☀️" : "🌙";
+  themeToggle.setAttribute("aria-pressed", String(!isLight));
+});
+
+/* Search */
+const searchInput=document.getElementById("searchInput");
+searchInput.addEventListener("keydown", (e)=>{
+  if(e.key==="Enter"){
+    const q=searchInput.value.trim().toLowerCase();
+    const match=pageOrder.find(p=>titles[p].toLowerCase().includes(q));
+    if(match){ goTo(match); showToast("Jumped to "+titles[match]); }
+  }
+});
+
+/* Keyboard shortcuts */
+document.addEventListener("keydown", (e)=>{
+  const tag=(e.target.tagName||"").toLowerCase();
+  if(tag==="input"||tag==="textarea"){ if(e.key==="Escape") e.target.blur(); return; }
+  if(e.key==="Escape"){ closeDrawer(); return; }
+  if(e.key==="/"){ e.preventDefault(); searchInput.focus(); return; }
+  if(e.key.toLowerCase()==="d"){ themeToggle.click(); return; }
+  if(/^[1-9]$/.test(e.key)){ const idx=parseInt(e.key,10)-1; if(pageOrder[idx]) goTo(pageOrder[idx]); }
+});
+
+/* Scroll progress + to-top */
+const progressBar=document.getElementById("scrollProgress"), toTopBtn=document.getElementById("toTop");
+window.addEventListener("scroll", ()=>{
+  const h=document.documentElement;
+  const pct = h.scrollTop / (h.scrollHeight - h.clientHeight || 1) * 100;
+  progressBar.style.width = pct+"%";
+  toTopBtn.classList.toggle("show", h.scrollTop > 400);
+});
+toTopBtn.addEventListener("click", ()=> window.scrollTo({top:0, behavior:"smooth"}));
+
+/* Toasts */
+function showToast(msg){
+  const host=document.getElementById("toastHost");
+  const t=document.createElement("div"); t.className="toast"; t.textContent=msg;
+  host.appendChild(t);
+  requestAnimationFrame(()=>t.classList.add("show"));
+  setTimeout(()=>{ t.classList.remove("show"); setTimeout(()=>t.remove(), 300); }, 2400);
+}
+
+/* Reveal-on-scroll for theory cards */
+function triggerReveals(){
+  document.querySelectorAll(".view.active .reveal").forEach(el=>el.classList.add("in"));
+}
+const revealObserver = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add("in"); });
+}, {threshold:0.15});
+document.querySelectorAll(".reveal").forEach(el=>revealObserver.observe(el));
+
+/* Loading screen */
+window.addEventListener("load", ()=>{
+  setTimeout(()=>document.getElementById("loader").classList.add("hide"), 500);
+});
+
+/* Particles */
+(function(){
+  const field=document.getElementById("particleField");
+  for(let i=0;i<16;i++){
+    const p=document.createElement("div"); p.className="particle";
+    p.style.left = (Math.random()*100)+"%";
+    p.style.animationDuration = (8+Math.random()*10)+"s";
+    p.style.animationDelay = (Math.random()*10)+"s";
+    p.style.bottom = "-10px";
+    field.appendChild(p);
+  }
+})();
+
+/* Animated counters */
+const counterObserver = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(!e.isIntersecting) return;
+    const el=e.target, target=parseInt(el.dataset.count,10);
+    let cur=0; const step=Math.max(1, Math.round(target/30));
+    const timer=setInterval(()=>{ cur+=step; if(cur>=target){cur=target; clearInterval(timer);} el.textContent=cur; }, 30);
+    counterObserver.unobserve(el);
+  });
+}, {threshold:0.4});
+document.querySelectorAll(".counter-num").forEach(el=>counterObserver.observe(el));
+
+/* Print / PDF */
+document.getElementById("printBtn").addEventListener("click", ()=> window.print());
+document.getElementById("downloadPdfBtn").addEventListener("click", ()=>{
+  goTo("theory");
+  showToast("Opening print dialog — choose “Save as PDF”");
+  setTimeout(()=>window.print(), 300);
+});
+
+/* =========================================================
+   TRUTH TABLE GENERATOR (shared state with K-Map)
+   ========================================================= */
+const sharedOutputs = {};
+function defaultZeros(n){ return n===2?[1,2] : n===3?[1,4,6] : [2,5,9,12]; }
+[2,3,4].forEach(n=>{
+  sharedOutputs[n] = new Array(Math.pow(2,n)).fill(1);
+  defaultZeros(n).forEach(i=>{ if(i<sharedOutputs[n].length) sharedOutputs[n][i]=0; });
+});
+
+let ttN=3;
+function renderTruthTable(){
+  const vars=ALL_VARS.slice(0,ttN);
+  document.getElementById("ttVarlabel").textContent = vars.join(", ");
+  const thead=document.getElementById("ttTheadRow");
+  thead.innerHTML = vars.map(v=>`<th>${v}</th>`).join("") + "<th>#</th><th>F</th>";
+  const tbody=document.getElementById("ttTbody"); tbody.innerHTML="";
+  const outputs=sharedOutputs[ttN];
+  for(let row=0; row<outputs.length; row++){
+    const bits=bitsOf(row,ttN); const isZero=outputs[row]===0;
+    const tr=document.createElement("tr"); if(isZero) tr.classList.add("zero-row");
+    tr.innerHTML = bits.map(b=>`<td>${b}</td>`).join("") + `<td class="row-idx">${row}</td>` +
+      `<td><button class="bit-out ${isZero?'zero':'one'}" data-row="${row}">${outputs[row]}</button></td>`;
+    tbody.appendChild(tr);
+  }
+  tbody.querySelectorAll(".bit-out").forEach(btn=>btn.addEventListener("click", ()=>{
+    const r=parseInt(btn.dataset.row,10); outputs[r]=outputs[r]===1?0:1; renderTruthTable();
+  }));
+  const result = canonicalPOS(ttN, outputs);
+  const maxtermList=document.getElementById("ttMaxtermList"), exprBox=document.getElementById("ttExprBox"), shorthand=document.getElementById("ttShorthand");
+  if(result.zeroRows.length===0){ maxtermList.innerHTML=`<span class="maxterm-chip" style="color:var(--muted);">none — F is always 1</span>`; }
+  else if(result.zeroRows.length===outputs.length){ maxtermList.innerHTML=`<span class="maxterm-chip" style="color:var(--amber);">every row — F is always 0</span>`; }
+  else { maxtermList.innerHTML = result.zeroRows.map(r=>`<span class="maxterm-chip">M${r} = ${maxtermHTML(bitsOf(r,ttN), vars)}</span>`).join(""); }
+  exprBox.innerHTML = result.html; shorthand.innerHTML = result.shorthand;
+}
+document.getElementById("ttVarSelect").addEventListener("click", (e)=>{
+  const btn=e.target.closest("button[data-n]"); if(!btn) return;
+  document.querySelectorAll("#ttVarSelect button").forEach(b=>b.classList.remove("active")); btn.classList.add("active");
+  ttN=parseInt(btn.dataset.n,10); renderTruthTable();
+});
+renderTruthTable();
+
+/* =========================================================
+   K-MAP SOLVER
+   ========================================================= */
+const GRAY2 = [[0],[1]];
+const GRAY4 = [[0,0],[0,1],[1,1],[1,0]];
+
+function kmapLayout(n){
+  if(n===2) return { rowVars:["A"], colVars:["B"], rowSeq:GRAY2, colSeq:GRAY2 };
+  if(n===3) return { rowVars:["A"], colVars:["B","C"], rowSeq:GRAY2, colSeq:GRAY4 };
+  return { rowVars:["A","B"], colVars:["C","D"], rowSeq:GRAY4, colSeq:GRAY4 };
+}
+function kmCellIndex(n, rBits, cBits){ return idxFromBits([...rBits, ...cBits]); }
+
+let kmN=3;
+function renderKmap(){
+  const layout=kmapLayout(kmN); const vars=ALL_VARS.slice(0,kmN);
+  document.getElementById("kmVarlabel").textContent = vars.join(", ");
+  const outputs = sharedOutputs[kmN];
+  const simplified = computeSimplified(kmN, outputs);
+  const canonical = canonicalPOS(kmN, outputs);
+
+  const grid=document.getElementById("kmapGrid");
+  let html = "<tr><th class='kmap-corner'>"+layout.rowVars.join("")+" \\ "+layout.colVars.join("")+"</th>";
+  layout.colSeq.forEach(c=> html += `<th>${c.join("")}</th>`);
+  html += "</tr>";
+  layout.rowSeq.forEach((r)=>{
+    html += `<tr><th>${r.join("")}</th>`;
+    layout.colSeq.forEach((c)=>{
+      const idx = kmCellIndex(kmN, r, c);
+      const val = outputs[idx];
+      const dots = simplified.groups.filter(g=>g.mt.has(idx))
+        .map((g,gi)=>`<span class="grp-dot" style="background:${g.color}; color:${g.color}; animation-delay:${gi*0.12}s"></span>`).join("");
+      html += `<td class="${val===0?'zero':'one'}" data-idx="${idx}">${val}<span class="grp-dots">${dots}</span></td>`;
+    });
+    html += "</tr>";
+  });
+  grid.innerHTML = html;
+  grid.querySelectorAll("td[data-idx]").forEach(td=>{
+    td.addEventListener("click", ()=>{
+      const idx=parseInt(td.dataset.idx,10);
+      outputs[idx] = outputs[idx]===1?0:1;
+      renderKmap();
+    });
+  });
+
+  document.getElementById("kmCanonicalBox").innerHTML = canonical.html;
+  document.getElementById("kmSimplifiedBox").innerHTML = simplified.html;
+
+  const legend=document.getElementById("kmLegend");
+  if(simplified.groups.length===0){
+    legend.innerHTML = `<div class="legend-row" style="animation-delay:0s;">No zero cells to group — see the boxes above.</div>`;
+  } else {
+    legend.innerHTML = simplified.groups.map((g,i)=>
+      `<div class="legend-row" style="animation-delay:${i*0.15}s;">
+        <span class="legend-swatch" style="background:${g.color}; color:${g.color};"></span>
+        Group ${i+1}${g.essential?' (essential)':''}: ${g.size} cell${g.size>1?'s':''} → <span class="mono">${g.term}</span>
+      </div>`).join("");
+  }
+}
+document.getElementById("kmVarSelect").addEventListener("click", (e)=>{
+  const btn=e.target.closest("button[data-n]"); if(!btn) return;
+  document.querySelectorAll("#kmVarSelect button").forEach(b=>b.classList.remove("active")); btn.classList.add("active");
+  kmN=parseInt(btn.dataset.n,10); renderKmap();
+});
+document.getElementById("kmRandomBtn").addEventListener("click", ()=>{
+  const outputs=sharedOutputs[kmN]; let zeroCount;
+  let attempt;
+  do{ attempt=outputs.map(()=>Math.random()<0.5?0:1); zeroCount=attempt.filter(v=>v===0).length; }
+  while(zeroCount<2 || zeroCount>outputs.length-1);
+  for(let i=0;i<outputs.length;i++) outputs[i]=attempt[i];
+  renderKmap(); showToast("Random K-Map generated");
+});
+document.getElementById("kmResetBtn").addEventListener("click", ()=>{
+  const outputs=sharedOutputs[kmN]; for(let i=0;i<outputs.length;i++) outputs[i]=1;
+  renderKmap(); showToast("K-Map reset");
+});
+renderKmap();
+
+/* =========================================================
+   CONVERSION PAGE — tabs + expression converter
+   ========================================================= */
+document.getElementById("convTabs").addEventListener("click", (e)=>{
+  const btn=e.target.closest(".tab-btn"); if(!btn) return;
+  document.querySelectorAll("#convTabs .tab-btn").forEach(b=>b.classList.remove("active")); btn.classList.add("active");
+  document.querySelectorAll("#view-conversion .tab-panel").forEach(p=>p.classList.remove("active"));
+  document.getElementById("tab-"+btn.dataset.tab).classList.add("active");
+});
+
+function buildExpressionConverterUI(containerId, placeholder, defaultVal){
+  const host=document.getElementById(containerId);
+  host.innerHTML = `
+    <label class="field-label">Expression</label>
+    <input class="expr-input" value="${defaultVal||''}" placeholder="${placeholder}">
+    <div class="btn-row"><button class="btn small">Convert</button></div>
+    <div class="out"></div>`;
+  const input=host.querySelector("input"), btn=host.querySelector("button"), out=host.querySelector(".out");
+  function run(){
+    out.innerHTML="";
+    try{
+      const {vars, outputs, n} = truthFromExpression(input.value);
+      const canonical = canonicalPOS(n, outputs);
+      const simplified = computeSimplified(n, outputs);
+      let stepsHTML = "";
+      stepsHTML += `<div class="step-card" style="animation-delay:.05s;"><div class="tag">Step 1 — Detected variables</div>${vars.join(", ")} (${Math.pow(2,n)} rows)</div>`;
+      const zeroList = canonical.zeroRows.length ? canonical.zeroRows.join(", ") : "none";
+      stepsHTML += `<div class="step-card" style="animation-delay:.15s;"><div class="tag">Step 2 — Zero rows</div>Rows where the expression evaluates to 0: <span class="mono">${zeroList}</span></div>`;
+      stepsHTML += `<div class="step-card" style="animation-delay:.25s;"><div class="tag">Step 3 — Canonical POS</div><span class="mono">${canonical.html}</span></div>`;
+      stepsHTML += `<div class="step-card" style="animation-delay:.35s;"><div class="tag">Step 4 — Simplified POS (K-map grouping)</div><span class="mono">${simplified.html}</span></div>`;
+      out.innerHTML = stepsHTML;
+    }catch(err){ out.innerHTML = `<div class="err-msg">${err.message}</div>`; }
+  }
+  btn.addEventListener("click", run);
+  if(defaultVal) run();
+}
+buildExpressionConverterUI("exprConverter", "e.g. (A+B)(A'+C) or AB' + A'C", "");
+buildExpressionConverterUI("stdposConverter", "e.g. (A+B)(A'+C)", "(A+B)(A'+C)");
+buildExpressionConverterUI("sopConverter", "e.g. A'B + AC'", "A'B + AC'");
+
+/* =========================================================
+   CALCULATOR PAGE
+   ========================================================= */
+document.getElementById("calcTabs").addEventListener("click", (e)=>{
+  const btn=e.target.closest(".tab-btn"); if(!btn) return;
+  document.querySelectorAll("#calcTabs .tab-btn").forEach(b=>b.classList.remove("active")); btn.classList.add("active");
+  document.querySelectorAll("#view-calculator .tab-panel").forEach(p=>p.classList.remove("active"));
+  document.getElementById("calctab-"+btn.dataset.tab).classList.add("active");
+});
+let calcN=3;
+document.getElementById("calcVarSelect").addEventListener("click", (e)=>{
+  const btn=e.target.closest("button[data-n]"); if(!btn) return;
+  document.querySelectorAll("#calcVarSelect button").forEach(b=>b.classList.remove("active")); btn.classList.add("active");
+  calcN=parseInt(btn.dataset.n,10);
+});
+function outBlockWithCopy(canonical, simplified){
+  return `
+    <div class="output-block">
+      <div><div class="panel-title">Canonical POS</div><div class="expr-box">${canonical.html}</div></div>
+      <div><div class="panel-title">Simplified POS</div><div class="expr-box" style="color:var(--cyan); border-color:var(--line-strong); background:rgba(99,224,255,0.06);">${simplified.html}</div></div>
+      <div class="btn-row"><button class="btn ghost small copy-btn" data-copy="${canonical.text.replace(/"/g,'&quot;')}">📋 Copy canonical</button><button class="btn ghost small copy-btn" data-copy="${simplified.text.replace(/"/g,'&quot;')}">📋 Copy simplified</button></div>
+    </div>`;
+}
+document.addEventListener("click", (e)=>{
+  const cb=e.target.closest(".copy-btn"); if(!cb) return;
+  navigator.clipboard && navigator.clipboard.writeText(cb.dataset.copy).then(()=>showToast("Copied to clipboard"));
+});
+document.getElementById("calcMtRun").addEventListener("click", ()=>{
+  const out=document.getElementById("calcMtOut"); out.innerHTML="";
+  const raw=document.getElementById("calcMtInput").value.trim();
+  const total=Math.pow(2,calcN);
+  try{
+    const list = raw.split(",").map(s=>s.trim()).filter(Boolean).map(s=>{
+      const v=parseInt(s,10); if(isNaN(v)||v<0||v>=total) throw new Error(`"${s}" is not a valid maxterm index for ${calcN} variables (0–${total-1}).`);
+      return v;
+    });
+    const outputs=new Array(total).fill(1); list.forEach(i=>outputs[i]=0);
+    const canonical=canonicalPOS(calcN, outputs), simplified=computeSimplified(calcN, outputs);
+    out.innerHTML = outBlockWithCopy(canonical, simplified);
+  }catch(err){ out.innerHTML=`<div class="err-msg">${err.message}</div>`; }
+});
+document.getElementById("calcMtReset").addEventListener("click", ()=>{
+  document.getElementById("calcMtInput").value=""; document.getElementById("calcMtOut").innerHTML="";
+});
+document.getElementById("calcExRun").addEventListener("click", ()=>{
+  const out=document.getElementById("calcExOut"); out.innerHTML="";
+  try{
+    const {outputs, n} = truthFromExpression(document.getElementById("calcExInput").value);
+    const canonical=canonicalPOS(n, outputs), simplified=computeSimplified(n, outputs);
+    out.innerHTML = outBlockWithCopy(canonical, simplified);
+  }catch(err){ out.innerHTML=`<div class="err-msg">${err.message}</div>`; }
+});
+document.getElementById("calcExReset").addEventListener("click", ()=>{
+  document.getElementById("calcExInput").value=""; document.getElementById("calcExOut").innerHTML="";
+});
+
+/* =========================================================
+   SOLVED EXAMPLES (15) — auto-computed
+   ========================================================= */
+const exampleConfigs = [
+  {n:2, zeros:[1]}, {n:2, zeros:[0,3]}, {n:2, zeros:[1,2]},
+  {n:3, zeros:[0]}, {n:3, zeros:[1,4,6]}, {n:3, zeros:[0,2,5,7]},
+  {n:3, zeros:[3,4,5]}, {n:3, zeros:[1,2,3,6,7]}, {n:3, zeros:[0,1,2,3]},
+  {n:3, zeros:[2,3,6,7]}, {n:4, zeros:[0,2,8,10]}, {n:4, zeros:[1,3,5,7,9,11,13,15]},
+  {n:4, zeros:[5,7,13,15]}, {n:4, zeros:[0,1,2,3,4,5,6,7]}, {n:4, zeros:[6,7,14,15,2,3]}
+];
+function renderMiniKmap(n, outputs){
+  const layout=kmapLayout(n); let html="<table class='kmap-grid mini-kmap'><tr><th class='kmap-corner'></th>";
+  layout.colSeq.forEach(c=> html+=`<th>${c.join("")}</th>`); html+="</tr>";
+  const simplified = computeSimplified(n, outputs);
+  layout.rowSeq.forEach(r=>{
+    html+=`<tr><th>${r.join("")}</th>`;
+    layout.colSeq.forEach(c=>{
+      const idx=kmCellIndex(n,r,c); const val=outputs[idx];
+      html+=`<td class="${val===0?'zero':'one'}">${val}</td>`;
+    });
+    html+="</tr>";
+  });
+  html+="</table>";
+  return {html, simplified};
+}
+function renderExamples(){
+  const host=document.getElementById("examplesHost");
+  host.innerHTML = exampleConfigs.map((cfg, i)=>{
+    const outputs=new Array(Math.pow(2,cfg.n)).fill(1); cfg.zeros.forEach(z=>outputs[z]=0);
+    const vars=ALL_VARS.slice(0,cfg.n);
+    const canonical=canonicalPOS(cfg.n, outputs);
+    const {html:kmapHTML, simplified} = renderMiniKmap(cfg.n, outputs);
+    let ttRows="";
+    for(let row=0; row<outputs.length; row++){
+      const bits=bitsOf(row,cfg.n); const isZero=outputs[row]===0;
+      ttRows += `<tr class="${isZero?'zero-row':''}">${bits.map(b=>`<td>${b}</td>`).join("")}<td>${outputs[row]}</td></tr>`;
+    }
+    return `<div class="example-card">
+      <h4>Example ${i+1} — F(${vars.join(",")}), zeros at {${cfg.zeros.join(", ")}}<span class="badge">${cfg.n}-var</span></h4>
+      <div class="example-grid">
+        <div>
+          <div class="panel-title">Truth table</div>
+          <table class="truth"><thead><tr>${vars.map(v=>`<th>${v}</th>`).join("")}<th>F</th></tr></thead><tbody>${ttRows}</tbody></table>
+        </div>
+        <div>
+          <div class="panel-title">K-Map</div>
+          <div class="kmap-wrap">${kmapHTML}</div>
+        </div>
+      </div>
+      <div class="final-line">Canonical POS: ${canonical.text}</div>
+      <div class="final-line" style="color:var(--cyan); background:rgba(99,224,255,0.06); border-color:var(--line-strong);">Simplified POS: ${simplified.text}</div>
+    </div>`;
+  }).join("");
+}
+renderExamples();
+
+/* =========================================================
+   QUIZ — MCQ + True/False + Fill-in-the-blank (22 questions)
+   ========================================================= */
+const quizBank = [
+  {type:"mcq", q:"In canonical POS, each sum term is called a:", options:["Minterm","Maxterm","Literal","Implicant"], a:1},
+  {type:"mcq", q:"A maxterm evaluates to 0 for:", options:["Every input","No input","Exactly one input combination","Two input combinations"], a:2},
+  {type:"mcq", q:"Canonical POS is also known as:", options:["Standard SOP form","A simplified form","Maxterm / conjunctive normal form","Minterm form"], a:2},
+  {type:"mcq", q:"For variable X = 1 in a zero-row, the maxterm rule writes:", options:["X","X'","Either X or X'","X + 1"], a:1},
+  {type:"mcq", q:"The shorthand notation for canonical POS uses the symbol:", options:["Σ","Π","∫","Δ"], a:1},
+  {type:"mcq", q:"POS stands for:", options:["Product of Sums","Power of Sets","Product of Signals","Path of States"], a:0},
+  {type:"mcq", q:"SOP is built by ______ minterms.", options:["ANDing","ORing","XORing","Complementing"], a:1},
+  {type:"mcq", q:"POS is built by ______ maxterms.", options:["ANDing","ORing","XORing","Complementing"], a:0},
+  {type:"mcq", q:"In a 3-variable K-map, how many cells are there?", options:["4","6","8","16"], a:2},
+  {type:"mcq", q:"K-map row/column headers use ______ code so adjacent cells differ by one bit.", options:["Binary","ASCII","Gray","Hex"], a:2},
+  {type:"mcq", q:"Which algorithm is commonly used to find prime implicants for simplification?", options:["Dijkstra's algorithm","Quine–McCluskey method","Karatsuba algorithm","Kruskal's algorithm"], a:1},
+  {type:"mcq", q:"A prime implicant that is the only one covering a particular zero-row is called:", options:["Redundant","Essential","Optional","Dominant"], a:1},
+  {type:"mcq", q:"Standard POS differs from canonical POS because:", options:["It never contains variables","Its sum terms don't have to contain every variable","It's always simpler to compute","It uses AND of ANDs"], a:1},
+  {type:"mcq", q:"Which is a real application of POS in digital electronics?", options:["Painting circuit boards","Designing combinational logic circuits","Compiling C code","Rendering 3D graphics"], a:1},
+  {type:"tf", q:"Every maxterm in a canonical POS expression contains all variables of the function.", a:true},
+  {type:"tf", q:"Canonical POS and canonical SOP always describe different truth tables for the same function.", a:false},
+  {type:"tf", q:"Gray code values adjacent in sequence always differ in exactly one bit.", a:true},
+  {type:"tf", q:"A K-map for 4 variables has 8 cells.", a:false},
+  {type:"fib", q:"The canonical POS is a product of ______.", answers:["maxterms","max terms"]},
+  {type:"fib", q:"In F = Π M(1,4,6), the symbol Π represents a product of ______.", answers:["maxterms","max terms"]},
+  {type:"fib", q:"K-map grouping is used to find a ______ (simpler) Boolean expression.", answers:["simplified","minimal","minimized"]},
+  {type:"fib", q:"For a zero-row where variable X = 0, the maxterm rule writes the literal as ______ (plain or complemented).", answers:["plain","x","uncomplemented"]}
+];
+function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+let quizOrder = shuffle(quizBank.map((_,i)=>i));
+let quizIdx = 0, quizScore = 0, quizAnsweredThis = false;
+
+function renderQuizQuestion(){
+  quizAnsweredThis=false;
+  const q = quizBank[quizOrder[quizIdx]];
+  document.getElementById("quizPos").textContent = `Question ${quizIdx+1} of ${quizOrder.length}`;
+  document.getElementById("quizProgressFill").style.width = (quizIdx/quizOrder.length*100)+"%";
+  const area = document.getElementById("quizArea");
+  const typeLabel = q.type==="mcq" ? "Multiple choice" : q.type==="tf" ? "True / False" : "Fill in the blank";
+  let inner = `<div class="qtype-tag">${typeLabel}</div><div class="quiz-prompt">${q.q}</div>`;
+
+  if(q.type==="mcq"){
+    inner += `<div class="options">` + q.options.map((opt,i)=>`<button class="opt" data-idx="${i}">${opt}</button>`).join("") + `</div>`;
+  } else if(q.type==="tf"){
+    inner += `<div class="options"><button class="opt" data-val="true">True</button><button class="opt" data-val="false">False</button></div>`;
+  } else {
+    inner += `<div class="fib-row"><input class="expr-input" id="fibInput" style="max-width:260px;" placeholder="type your answer"><button class="btn small" id="fibSubmit">Submit</button></div>`;
+  }
+  inner += `<div class="feedback" id="quizFeedback"></div>
+    <div class="quiz-actions"><button class="btn next" id="quizNextBtn" style="display:none;">Next question →</button></div>`;
+  area.innerHTML = inner;
+
+  const feedback = document.getElementById("quizFeedback");
+  const nextBtn = document.getElementById("quizNextBtn");
+
+  function finishQuestion(isCorrect, correctText){
+    if(quizAnsweredThis) return;
+    quizAnsweredThis = true;
+    quizScore += isCorrect ? 1 : 0;
+    document.getElementById("quizScore").textContent = quizScore;
+    document.getElementById("quizTotal").textContent = quizIdx+1;
+    feedback.textContent = isCorrect ? "Correct!" : `Not quite — correct answer: ${correctText}`;
+    feedback.className = "feedback " + (isCorrect ? "good" : "bad");
+    nextBtn.style.display = "inline-flex";
+  }
+
+  if(q.type==="mcq"){
+    area.querySelectorAll(".opt").forEach(btn=>btn.addEventListener("click", ()=>{
+      if(quizAnsweredThis) return;
+      const idx=parseInt(btn.dataset.idx,10);
+      area.querySelectorAll(".opt").forEach(b=>b.disabled=true);
+      const correct = idx===q.a;
+      btn.classList.add(correct?"correct":"wrong");
+      if(!correct) area.querySelectorAll(".opt")[q.a].classList.add("correct");
+      finishQuestion(correct, q.options[q.a]);
+    }));
+  } else if(q.type==="tf"){
+    area.querySelectorAll(".opt").forEach(btn=>btn.addEventListener("click", ()=>{
+      if(quizAnsweredThis) return;
+      const val = btn.dataset.val==="true";
+      area.querySelectorAll(".opt").forEach(b=>b.disabled=true);
+      const correct = val===q.a;
+      btn.classList.add(correct?"correct":"wrong");
+      if(!correct) area.querySelectorAll(".opt")[q.a?0:1].classList.add("correct");
+      finishQuestion(correct, q.a ? "True" : "False");
+    }));
+  } else {
+    document.getElementById("fibSubmit").addEventListener("click", ()=>{
+      if(quizAnsweredThis) return;
+      const val=(document.getElementById("fibInput").value||"").trim().toLowerCase();
+      const correct = q.answers.includes(val);
+      document.getElementById("fibInput").disabled=true; document.getElementById("fibSubmit").disabled=true;
+      finishQuestion(correct, q.answers[0]);
+    });
+  }
+
+  nextBtn.addEventListener("click", ()=>{
+    quizIdx++;
+    if(quizIdx>=quizOrder.length){ renderQuizComplete(); } else { renderQuizQuestion(); }
+  });
+}
+function renderQuizComplete(){
+  document.getElementById("quizPos").textContent = "Complete";
+  document.getElementById("quizProgressFill").style.width = "100%";
+  const pct = Math.round(quizScore/quizOrder.length*100);
+  document.getElementById("quizArea").innerHTML = `
+    <div class="quiz-prompt">Final score: <strong style="color:var(--emerald);">${quizScore} / ${quizOrder.length}</strong> (${pct}%)</div>
+    <p>${pct>=80 ? "Excellent work — canonical POS is second nature to you." : pct>=50 ? "Good effort — revisit the Theory page for the trickier concepts." : "Worth another pass through Theory and the Conversion steps."}</p>
+    <div class="quiz-actions"><button class="btn next" id="quizRestartBtn">↺ Restart quiz</button></div>`;
+  document.getElementById("quizRestartBtn").addEventListener("click", ()=>{
+    quizOrder = shuffle(quizBank.map((_,i)=>i)); quizIdx=0; quizScore=0;
+    document.getElementById("quizScore").textContent="0";
+    renderQuizQuestion();
+    showToast("Quiz restarted");
+  });
+}
+renderQuizQuestion();
+
+/* initial reveal trigger for home (in case theory isn't visited first) */
+triggerReveals();
+
+})();
+</script>
+</body>
+</html>
